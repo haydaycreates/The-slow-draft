@@ -1,11 +1,12 @@
 # Build and verify — runs on every push and pull request.
 #
-# The same three checks Netlify runs on deploy, executed first on GitHub so a
-# broken post fails here instead of on the live site:
+# Four checks run on GitHub before a broken post or incomplete CMS bundle can
+# reach the live site:
 #
 #   1. check:cms    — does public/admin/config.yml still match the content model?
 #   2. build        — does Astro accept every markdown file?
-#   3. check:links  — does every local link, font path and asset in the output resolve?
+#   3. check:admin  — did the self-hosted Decap bundle and all its chunks reach dist/?
+#   4. check:links  — does every local link, font path and asset in the output resolve?
 
 name: Build and verify
 
