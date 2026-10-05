@@ -11,20 +11,21 @@
       Decap CMS (the browser dashboard that commits markdown to git) plus the
       Netlify Identity widget it uses to sign you in with git-gateway.
 
-      Versions are pinned to an exact release so a CDN update can never change
-      the editor underneath you. To upgrade, change the number in both URLs.
+      Both scripts are now vendored locally in public/admin/vendor/ to avoid
+      CDN dependencies. This ensures the editor loads in offline environments,
+      sandboxed preview panes, and situations where unpkg or identity.netlify.com
+      are blocked.
 
-      Prefer no third-party requests? Vendor both files instead:
+      To update the vendored scripts in the future, download new versions via:
 
         curl -L -o public/admin/vendor/decap-cms.js \
           https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js
         curl -L -o public/admin/vendor/netlify-identity-widget.js \
           https://identity.netlify.com/v1/netlify-identity-widget.js
 
-        …then point the two <script src> tags below at
-        /admin/vendor/decap-cms.js and /admin/vendor/netlify-identity-widget.js.
+      …then commit the new versions to the repository.
     -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="/admin/vendor/netlify-identity-widget.js"></script>
     <script>
       /* Netlify Identity hands back a token in the URL fragment; this clears it
          and drops you straight into the editor after signing in. */
@@ -38,7 +39,7 @@
         });
       }
     </script>
-    <script src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"></script>
+    <script src="/admin/vendor/decap-cms.js"></script>
 
     <style>
       /* Shown only if the CMS script cannot load (offline, blocked CDN, or a
@@ -71,13 +72,17 @@
     <div class="boot" id="boot-failed" hidden>
       <h1>The editor could not load</h1>
       <p>
-        This page loads Decap CMS from unpkg. If you are seeing this, the script was
-        blocked — usually an offline browser or a sandboxed preview pane.
+        The editor did not load after 6 seconds. This might indicate a problem
+        with the vendored scripts or the Netlify Identity service.
       </p>
       <p>
-        Open <code>/admin/</code> on the deployed site, or vendor the script into
-        <code>public/admin/vendor/</code> (see the comment in this file) so it needs no network.
+        Try refreshing the page. If the problem persists, check that:
       </p>
+      <ul>
+        <li><code>public/admin/vendor/decap-cms.js</code> exists and is valid</li>
+        <li><code>public/admin/vendor/netlify-identity-widget.js</code> exists and is valid</li>
+        <li>Netlify Identity is enabled on your site</li>
+      </ul>
       <p style="color:#8b7f70;font-size:.9rem">
         Your posts are safe either way — they live in <code>src/content/blog/</code> in git.
       </p>
