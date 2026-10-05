@@ -1,0 +1,72 @@
+# Deploy to GitHub Pages — only after you opt in (DEPLOYMENT.md, Step E).
+#
+# Stays skipped until you add the repository variable DEPLOY_TO_PAGES = "true"
+# (Settings → Secrets and variables → Actions → Variables). That keeps runs
+# quiet until Pages is actually enabled on the repo.
+#
+# Requires the repo to be served at a root address: either it is named
+# <your-username>.github.io, or it has a custom domain configured on Pages.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Skip every step until the opt-in variable is set.
+env:
+  DEPLOY_TO_PAGES: ${{ vars.DEPLOY_TO_PAGES }}
+
+jobs:
+  build:
+    if: vars.DEPLOY_TO_PAGES == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify CMS config, build, audit links
+        run: npm run verify
+
+      - name: Compute the site address
+        id: site
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          if [[ "$repo" == *.github.io ]]; then
+            echo "url=https://${GITHUB_REPOSITORY%%/*}.github.io/" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://${GITHUB_REPOSITORY%%/*}.github.io/${repo}/" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the static site
+        run: npm run build
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: vars.DEPLOY_TO_PAGES == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

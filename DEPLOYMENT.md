@@ -53,11 +53,8 @@ GitHub Pages it needs a small OAuth helper you deploy once.
 
 ## Step 0 — Before you push (5 minutes)
 
-These four edits make the site yours. Do them in a terminal:
-
-```bash
-cd astro-blog
-```
+These four edits make the site yours. Do them in a terminal, in the project
+folder (the root of this repository, where `package.json` lives).
 
 ### 0.1 Check the project is ready
 
@@ -120,7 +117,7 @@ them for now.
 
 ### A.2 Push your project
 
-In your terminal, inside the `astro-blog` folder:
+In your terminal, inside the project folder:
 
 ```bash
 git init

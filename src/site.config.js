@@ -75,7 +75,7 @@ export const site = {
 
   /* Absolute URL used in RSS, the sitemap and canonical tags.
      SITE_URL=https://yourdomain.com npm run build overrides this. */
-  url: "https://the-slow-draft.example",
+  url: "https://theslowdraft.netlify.app",
 };
 
 export default site;
