@@ -3,7 +3,7 @@ name: Auto Apply Patch
 on:
   push:
     paths:
-      - 'patches/*.patch'
+      - '**/*.patch'
 
 jobs:
   apply-patch:
@@ -12,25 +12,35 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Find and Apply Patch
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Latest patch file dhoond kar apply karein
-          LATEST_PATCH=$(ls -t patches/*.patch | head -n 1)
-          echo "Applying $LATEST_PATCH"
-          git apply --reject --whitespace=fix "$LATEST_PATCH" || git apply -3 "$LATEST_PATCH"
-          
-          # Patch file ko delete karein taaki loop na bane
-          rm "$LATEST_PATCH"
-          
-          git add -A
-          git commit -m "Auto-applied patch: $(basename $LATEST_PATCH)" || exit 0
-          git push origin main
 
+      - name: Apply and Remove Patch
+        run: |
+          # Sabse nayi uploaded patch file find karein
+          PATCH_FILE=$(find . -maxdepth 2 -name "*.patch" | head -n 1)
+
+          if [ -z "$PATCH_FILE" ]; then
+            echo "No patch file found."
+            exit 0
+          fi
+
+          echo "Applying patch: $PATCH_FILE"
+
+          # 6MB jaisi badi files ke liye whitespace ignore aur 3-way merge backup
+          git apply --reject --whitespace=fix "$PATCH_FILE" || git apply -3 "$PATCH_FILE"
+
+          # Patch file ko delete karein taaki duplicate commit loop na bane
+          rm "$PATCH_FILE"
+
+          # Changes commit aur push karein
+          git add -A
+          git commit -m "Auto applied patch: $(basename $PATCH_FILE)" || echo "No changes to commit"
+          git push origin main
