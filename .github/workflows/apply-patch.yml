@@ -1,1 +1,36 @@
+name: Auto Apply Patch
+
+on:
+  push:
+    paths:
+      - 'patches/*.patch'
+
+jobs:
+  apply-patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find and Apply Patch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Latest patch file dhoond kar apply karein
+          LATEST_PATCH=$(ls -t patches/*.patch | head -n 1)
+          echo "Applying $LATEST_PATCH"
+          git apply --reject --whitespace=fix "$LATEST_PATCH" || git apply -3 "$LATEST_PATCH"
+          
+          # Patch file ko delete karein taaki loop na bane
+          rm "$LATEST_PATCH"
+          
+          git add -A
+          git commit -m "Auto-applied patch: $(basename $LATEST_PATCH)" || exit 0
+          git push origin main
 
