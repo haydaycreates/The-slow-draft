@@ -1,0 +1,30 @@
+---
+import { site } from '../site.config.js';
+
+const { variant = 'band' } = Astro.props;
+const endpoint = site.newsletter.endpoint || '';
+const mode = endpoint ? 'endpoint' : site.newsletter.mode;
+---
+
+<section class={`newsletter newsletter-${variant}`} id="subscribe">
+  <div class="wrap newsletter-inner">
+    <div class="newsletter-copy">
+      <h2>{site.newsletter.heading}</h2>
+      <p>{site.newsletter.blurb}</p>
+    </div>
+    <form
+      class="newsletter-form"
+      data-subscribe-form
+      data-mode={mode}
+      data-endpoint={endpoint}
+      data-email={site.author.email}
+      action={endpoint || `mailto:${site.author.email}`}
+      method="post"
+    >
+      <label class="sr-only" for="sub-email">Email address</label>
+      <input id="sub-email" name="email" type="email" required placeholder="you@example.com" autocomplete="email">
+      <button class="btn btn-solid" type="submit">Subscribe</button>
+      <p class="newsletter-note" data-subscribe-note role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,40 @@
+---
+import { site } from '../site.config.js';
+import { socialItems } from '../lib/format.js';
+
+const year = new Date().getFullYear();
+const socials = socialItems(site);
+---
+
+<footer class="site-foot">
+  <div class="wrap foot-inner">
+    <div class="foot-brand">
+      <span class="brand-mark" aria-hidden="true">❧</span>
+      <div>
+        <p class="foot-title">{site.title}</p>
+        <p class="foot-note">{site.footerNote} © {year} {site.author.name}</p>
+      </div>
+    </div>
+    <nav class="foot-nav">
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/resources/">Resources</a>
+      <a href="/blog/">Blog</a>
+      <a href="/rss.xml">RSS</a>
+      {site.adminLink && <a href={site.adminLink}>Write</a>}
+    </nav>
+    <div class="social">
+      {socials.map((item) => (
+        <a
+          class="social-item"
+          href={item.href}
+          target={item.href.startsWith('mailto:') ? undefined : '_blank'}
+          rel={item.href.startsWith('mailto:') ? undefined : 'noopener'}
+        >
+          {item.icon ? <Fragment set:html={item.icon} /> : null}
+          {item.label === 'Email' ? ' Email' : ` ${item.label}`}
+        </a>
+      ))}
+    </div>
+  </div>
+</footer>

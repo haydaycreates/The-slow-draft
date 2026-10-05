@@ -1,0 +1,26 @@
+{
+  "name": "the-slow-draft",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Slow Draft \u2014 a static personal blog built with Astro",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "check:cms": "node scripts/validate-cms-config.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "test:cms": "node scripts/test-cms-roundtrip.mjs",
+    "deploy": "npm run build && npm run check:links",
+    "verify": "npm run check:cms && npm run build && npm run check:links",
+    "migrate": "node scripts/migrate-from-db.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.2",
+    "astro": "^7.3.5"
+  }
+}

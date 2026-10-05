@@ -1,0 +1,71 @@
+---
+import { site } from '../site.config.js';
+import fonts from '../lib/fonts.js';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Newsletter from '../components/Newsletter.astro';
+
+const {
+  title = '',
+  description = '',
+  active = '',
+  bodyClass = '',
+} = Astro.props;
+
+/* Typography comes from site.config.js and is applied as a body class plus two
+   CSS custom properties — exactly how the dynamic site did it. */
+const bodyFontId = fonts.byId(site.typography.body) ? site.typography.body : 'serif';
+const headFontId = fonts.byId(site.typography.heading) ? site.typography.heading : bodyFontId;
+const sizeId = fonts.TEXT_SIZES.includes(site.typography.size) ? site.typography.size : 'medium';
+const typeVars = `--prose-font: ${fonts.stackFor(bodyFontId)}; --head-font: ${fonts.stackFor(headFontId)}`;
+
+const fullTitle = title ? `${title} — ${site.title}` : `${site.title} · ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{fullTitle}</title>
+    <meta name="description" content={description || site.tagline}>
+    <meta name="author" content={site.author.name}>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content={title || site.title}>
+    <meta property="og:description" content={description || site.tagline}>
+    <meta property="og:site_name" content={site.title}>
+    <link rel="canonical" href={canonical}>
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/fonts.css">
+    <link rel="stylesheet" href="/styles.css">
+    <slot name="head" />
+  </head>
+  <body class={`${bodyClass} font-${bodyFontId} size-${sizeId}`} style={typeVars}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header active={active} />
+    <main id="main">
+      <slot />
+    </main>
+    <Newsletter />
+    <Footer />
+    <script src="/site.js" defer></script>
+    {site.identityWidget && (
+      <>
+        {/* Invitation emails land here with a token in the fragment; this widget
+            converts it into a session for /admin/. See site.config.js. */}
+        <script src="https://identity.netlify.com/v1/netlify-identity-widget.js" is:inline></script>
+        <script is:inline>
+          if (window.netlifyIdentity) {
+            window.netlifyIdentity.on('init', (user) => {
+              if (!user) {
+                window.netlifyIdentity.on('login', () => { document.location.href = '/admin/'; });
+              }
+            });
+          }
+        </script>
+      </>
+    )}
+  </body>
+</html>

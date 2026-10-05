@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Writing desk — The Slow Draft</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!--
+      Decap CMS (the browser dashboard that commits markdown to git) plus the
+      Netlify Identity widget it uses to sign you in with git-gateway.
+
+      Versions are pinned to an exact release so a CDN update can never change
+      the editor underneath you. To upgrade, change the number in both URLs.
+
+      Prefer no third-party requests? Vendor both files instead:
+
+        curl -L -o public/admin/vendor/decap-cms.js \
+          https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js
+        curl -L -o public/admin/vendor/netlify-identity-widget.js \
+          https://identity.netlify.com/v1/netlify-identity-widget.js
+
+        …then point the two <script src> tags below at
+        /admin/vendor/decap-cms.js and /admin/vendor/netlify-identity-widget.js.
+    -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+      /* Netlify Identity hands back a token in the URL fragment; this clears it
+         and drops you straight into the editor after signing in. */
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on('init', (user) => {
+          if (!user) {
+            window.netlifyIdentity.on('login', () => {
+              document.location.href = '/admin/';
+            });
+          }
+        });
+      }
+    </script>
+    <script src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"></script>
+
+    <style>
+      /* Shown only if the CMS script cannot load (offline, blocked CDN, or a
+         sandboxed preview pane). The editor itself is styled by Decap. */
+      body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      .boot {
+        max-width: 34rem; margin: 12vh auto; padding: 0 1.5rem; color: #2a241e;
+      }
+      .boot h1 { font-family: Georgia, serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 .4em; }
+      .boot p { line-height: 1.6; color: #574c41; }
+      .boot code {
+        font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+        background: #f5eee0; border: 1px solid #e3d7c2; border-radius: 5px; padding: .08em .35em;
+      }
+      .boot .spinner {
+        width: 18px; height: 18px; margin-right: .5em; vertical-align: -3px;
+        border: 2px solid #e3d7c2; border-top-color: #a8442a; border-radius: 50%;
+        display: inline-block; animation: spin .8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <!-- replaced by the CMS as soon as it boots -->
+    <div class="boot" id="boot-note">
+      <p><span class="spinner"></span>Loading the writing desk…</p>
+    </div>
+
+    <div class="boot" id="boot-failed" hidden>
+      <h1>The editor could not load</h1>
+      <p>
+        This page loads Decap CMS from unpkg. If you are seeing this, the script was
+        blocked — usually an offline browser or a sandboxed preview pane.
+      </p>
+      <p>
+        Open <code>/admin/</code> on the deployed site, or vendor the script into
+        <code>public/admin/vendor/</code> (see the comment in this file) so it needs no network.
+      </p>
+      <p style="color:#8b7f70;font-size:.9rem">
+        Your posts are safe either way — they live in <code>src/content/blog/</code> in git.
+      </p>
+    </div>
+
+    <script>
+      /* If Decap has not booted after a few seconds, show the fallback note. */
+      setTimeout(() => {
+        const note = document.getElementById('boot-note');
+        const failed = document.getElementById('boot-failed');
+        const booted = document.querySelector('[data-react-class], #nc-root, .nc-app, [class*="AppHeader"]');
+        if (!booted) {
+          if (note) note.hidden = true;
+          if (failed) failed.hidden = false;
+        }
+      }, 6000);
+    </script>
+  </body>
+</html>

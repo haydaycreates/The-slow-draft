@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { site } from '../../site.config.js';
+import { tagCounts } from '../../lib/format.js';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return paginate(posts, { pageSize: site.postsPerPage });
+}
+
+const { page } = Astro.props;
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const allTags = tagCounts(posts).slice(0, 12);
+const suffix = page.currentPage > 1 ? `Page ${page.currentPage}` : 'Blog';
+---
+
+<BaseLayout
+  title={page.currentPage > 1 ? `Blog — page ${page.currentPage}` : 'Blog'}
+  description={`Every essay on ${site.title}: ${site.tagline}`}
+  active="/blog/"
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Blog</p>
+      <h1>{suffix === 'Blog' ? 'All writing' : `All writing — page ${page.currentPage}`}</h1>
+      <p class="page-sub">
+        {page.total} {page.total === 1 ? 'post' : 'posts'}. Browse by <a href="/rss.xml">RSS</a> or subscribe below.
+      </p>
+      <form class="searchbar" action="/blog/" method="get" role="search" data-search-form>
+        <input type="search" name="q" placeholder="Search posts…" aria-label="Search posts" data-search-input>
+        <button class="btn btn-ghost btn-sm" type="submit">Search</button>
+      </form>
+      {allTags.length > 0 && (
+        <div class="tag-cloud tag-cloud-sm">
+          {allTags.map((tag) => (
+            <a class="tag" href={`/blog/tag/${tag.slug}/`}>{tag.tag} <span>{tag.count}</span></a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section section-tight">
+    <div class="wrap">
+      <div class="grid grid-3" data-post-grid>
+        {page.data.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <div class="empty" data-empty-state hidden>
+        <h3>Nothing here yet</h3>
+        <p>No post matches that search.</p>
+        <a class="btn btn-ghost" href="/blog/">Back to all posts</a>
+      </div>
+
+      {page.lastPage > 1 && (
+        <nav class="pager" aria-label="Pagination">
+          {page.url.prev
+            ? <a class="btn btn-ghost btn-sm" href={page.url.prev}>← Newer</a>
+            : <span></span>}
+          <span class="pager-count">Page {page.currentPage} of {page.lastPage}</span>
+          {page.url.next
+            ? <a class="btn btn-ghost btn-sm" href={page.url.next}>Older →</a>
+            : <span></span>}
+        </nav>
+      )}
+    </div>
+  </section>
+</BaseLayout>

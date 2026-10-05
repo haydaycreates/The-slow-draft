@@ -1,0 +1,88 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config.js';
+import { ICONS, monogram, socialItems, postUrl } from '../lib/format.js';
+
+const page = await getEntry('pages', 'about');
+const { Content } = await render(page);
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const favourites = posts.slice(0, 3);
+
+/* The templates drew "I usually write about" from these same three posts.
+   Want every topic you have ever used? Swap `favourites` for `posts` below. */
+const topics = [...new Set(favourites.flatMap((post) => post.data.tags || []))].slice(0, 8);
+const socials = socialItems(site);
+---
+
+<BaseLayout
+  title="About"
+  description={page.data.heading || `About ${site.author.name}`}
+  active="/about/"
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">{page.data.eyebrow || 'About'}</p>
+      <h1>{page.data.heading}</h1>
+    </div>
+  </section>
+
+  <section class="section section-tight">
+    <div class="wrap about-page">
+      <aside class="about-card">
+        <div class="about-photo">
+          {site.author.photo
+            ? <img src={site.author.photo} alt={site.author.name}>
+            : <span class="mono-monogram">{monogram(site.author.name)}</span>}
+        </div>
+        <h2>{site.author.name}</h2>
+        <p class="muted">{site.author.role}</p>
+        <div class="social social-stack">
+          {socials.map((item) => (
+            <a class="social-item" href={item.href}
+              target={item.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={item.href.startsWith('mailto:') ? undefined : 'noopener'}>
+              {item.icon ? <Fragment set:html={item.icon} /> : null}
+              {item.label === 'Email' ? ' Email' : ` ${item.label}`}
+            </a>
+          ))}
+        </div>
+        {site.author.email && (
+          <a class="btn btn-solid btn-sm" href={`mailto:${site.author.email}`}>Get in touch</a>
+        )}
+      </aside>
+
+      <div class="about-body">
+        <div class="prose"><Content /></div>
+
+        {topics.length > 0 && (
+          <div class="about-topics">
+            <h3>I usually write about</h3>
+            <p class="tag-cloud">
+              {topics.map((topic) => (
+                <a
+                  class="tag tag-lg"
+                  href={`/blog/tag/${topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}
+                >{topic}</a>
+              ))}
+            </p>
+          </div>
+        )}
+
+        {favourites.length > 0 && (
+          <div class="about-topics">
+            <h3>A few favourites</h3>
+            <ul class="fav-list">
+              {favourites.map((post) => (
+                <li><a href={postUrl(post.id)}>{post.data.title}</a></li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

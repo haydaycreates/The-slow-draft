@@ -1,0 +1,123 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { site } from '../../site.config.js';
+import { ICONS, fmtDate, isoDate, readingTime, excerptOf } from '../../lib/format.js';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      /* the timeline the original site used: previous = older, next = newer */
+      older: posts[index + 1] || null,
+      newer: posts[index - 1] || null,
+      timeline: posts,
+    },
+  }));
+}
+
+const { post, older, newer, timeline } = Astro.props;
+const { Content } = await render(post);
+const tags = post.data.tags || [];
+const related = timeline
+  .filter((p) => p.id !== post.id && (p.data.tags || []).some((t) => tags.includes(t)))
+  .slice(0, 2);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={excerptOf(post, 200)}
+  active="/blog/"
+  bodyClass="is-post"
+>
+  <Fragment slot="head">
+    <meta property="og:type" content="article">
+    <meta property="article:published_time" content={isoDate(post.data.date)}>
+  </Fragment>
+
+  <article class="post">
+    <div class="wrap wrap-narrow">
+      <nav class="breadcrumb">
+        <a href="/blog/">Blog</a><span>/</span><span>{post.data.title}</span>
+      </nav>
+      <header class="post-head">
+        {tags.length > 0 && (
+          <p class="post-tags">
+            {tags.map((tag) => (
+              <a class="tag" href={`/blog/tag/${tag.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}>{tag}</a>
+            ))}
+          </p>
+        )}
+        <h1 class="post-title">{post.data.title}</h1>
+        {post.data.summary && <p class="post-standfirst">{post.data.summary}</p>}
+        <p class="post-meta">
+          <span>By {site.author.name}</span><span class="dot">·</span>
+          <time datetime={isoDate(post.data.date)}>{fmtDate(post.data.date)}</time>
+          <span class="dot">·</span><span>{readingTime(post.body)} min read</span>
+        </p>
+      </header>
+    </div>
+
+    {post.data.cover && (
+      <figure class="post-cover wrap">
+        <img src={post.data.cover} alt={post.data.title}>
+      </figure>
+    )}
+
+    <div class="wrap wrap-narrow">
+      <div class="prose" data-prose>
+        <Content />
+      </div>
+
+      <div class="post-foot">
+        <div class="post-share">
+          <button class="btn btn-ghost btn-sm" type="button" data-copy-link>
+            <Fragment set:html={ICONS.link} /> Copy link
+          </button>
+          <a class="btn btn-ghost btn-sm" href="/rss.xml"><Fragment set:html={ICONS.rss} /> RSS</a>
+        </div>
+        {tags.length > 0 && (
+          <p class="post-tags post-tags-foot">
+            {tags.map((tag) => (
+              <a class="tag" href={`/blog/tag/${tag.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}/`}>{tag}</a>
+            ))}
+          </p>
+        )}
+      </div>
+
+      <nav class="post-nav">
+        {older
+          ? (
+            <a class="post-nav-item" href={`/blog/${older.id}/`}>
+              <span class="post-nav-label">← Previous</span>
+              <span class="post-nav-title">{older.data.title}</span>
+            </a>
+          )
+          : <span></span>}
+        {newer
+          ? (
+            <a class="post-nav-item post-nav-next" href={`/blog/${newer.id}/`}>
+              <span class="post-nav-label">Next →</span>
+              <span class="post-nav-title">{newer.data.title}</span>
+            </a>
+          )
+          : <span></span>}
+      </nav>
+
+      {related.length > 0 && (
+        <aside class="related">
+          <h2>Keep reading</h2>
+          <div class="grid grid-2">
+            {related.map((item) => <PostCard post={item} />)}
+          </div>
+        </aside>
+      )}
+
+      <p class="post-back"><a class="more" href="/blog/">← All posts</a></p>
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,40 @@
+# Netlify build settings for the Astro static site.
+#
+# This file covers the build. The two things Decap CMS needs — Identity and
+# Git Gateway — are switches in the Netlify UI, not settings in a file:
+#
+#   Site configuration → Identity            → Enable Identity
+#   Identity → Registration                  → "Invite only"
+#   Identity → Services → Git Gateway        → Enable
+#
+# The full walkthrough is in README.md → "Writing from the browser".
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Astro 7 needs Node 22.12+. Netlify honours this; Cloudflare Pages reads
+  # NODE_VERSION from the dashboard's environment variables instead.
+  NODE_VERSION = "22.12.0"
+
+  # You do NOT need to set your site URL here: Netlify passes its own `URL`
+  # variable into every build and astro.config.mjs picks it up, so the RSS feed,
+  # sitemap and canonical tags are correct from the first deploy.
+  #
+  # Set SITE_URL only to force a different address — e.g. a custom domain before
+  # its DNS has moved over. It overrides everything else.
+  #
+  # SITE_URL = "https://yourdomain.com"
+
+# The dashboard should never show up in a search engine.
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+# Fonts never change — let the CDN keep them forever.
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

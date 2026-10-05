@@ -1,0 +1,116 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { site } from '../site.config.js';
+import { ICONS, excerptOf, plainText, monogram, tagCounts, postUrl } from '../lib/format.js';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const resources = (await getCollection('resources'))
+  .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+
+const featured = posts.find((p) => p.data.featured) || posts[0] || null;
+const latest = posts.slice(1, 5);
+const tags = tagCounts(posts).slice(0, 10);
+---
+
+<BaseLayout description={site.tagline} active="/">
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <p class="eyebrow">{site.hero.kicker}</p>
+      <h1 class="hero-title">{site.hero.heading}</h1>
+      <p class="hero-intro">{site.hero.intro}</p>
+      <p class="hero-actions">
+        <a class="btn btn-solid" href="/blog/">Read the blog <Fragment set:html={ICONS.arrow} /></a>
+        <a class="btn btn-ghost" href="/about/">About me</a>
+      </p>
+      <p class="hero-stats">
+        {posts.length} {posts.length === 1 ? 'essay' : 'essays'} published{site.author.email && (
+          <> · <a href={`mailto:${site.author.email}`}>say hello</a></>
+        )}
+      </p>
+    </div>
+  </section>
+
+  {featured && (
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Latest</h2>
+          <a class="more" href="/blog/">All posts <Fragment set:html={ICONS.arrow} /></a>
+        </div>
+        <div class="feature">
+          <a class="feature-hit" href={postUrl(featured.id)} aria-label={featured.data.title}></a>
+          <div class="feature-body">
+            <p class="card-meta">
+              <time datetime={featured.data.date.toISOString()}>
+                {featured.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
+              </time>
+              <span class="dot">·</span>
+              {Math.max(1, Math.round(plainText(featured.body).split(/\s+/).filter(Boolean).length / 220))} min read
+            </p>
+            <h3 class="feature-title">{featured.data.title}</h3>
+            <p class="feature-excerpt">{excerptOf(featured, 260)}</p>
+            <span class="read-more">Continue reading <Fragment set:html={ICONS.arrow} /></span>
+          </div>
+        </div>
+        <div class="grid grid-3">
+          {latest.map((post) => <PostCard post={post} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section-alt">
+    <div class="wrap about-strip">
+      <div class="about-strip-media">
+        {site.author.photo
+          ? <img src={site.author.photo} alt={site.author.name}>
+          : <span class="mono-monogram">{monogram(site.author.name)}</span>}
+      </div>
+      <div class="about-strip-body">
+        <p class="eyebrow">About</p>
+        <h2>{site.author.name}</h2>
+        <p class="muted">{site.author.role}</p>
+        <p>{site.author.shortBio}…</p>
+        <a class="more" href="/about/">More about me <Fragment set:html={ICONS.arrow} /></a>
+      </div>
+    </div>
+  </section>
+
+  {resources.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Resources</h2>
+          <a class="more" href="/resources/">Everything I recommend <Fragment set:html={ICONS.arrow} /></a>
+        </div>
+        <div class="grid grid-3">
+          {resources.slice(0, 3).map((resource) => (
+            <a class="res-card" href={resource.data.url} target="_blank" rel="noopener">
+              <span class="res-cat">{resource.data.category}</span>
+              <h3>{resource.data.title}</h3>
+              <p>{resource.data.description}</p>
+              <span class="res-open">Visit <Fragment set:html={ICONS.globe} /></span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {tags.length > 0 && (
+    <section class="section section-tight">
+      <div class="wrap">
+        <div class="section-head"><h2>Browse by topic</h2></div>
+        <p class="tag-cloud">
+          {tags.map((tag) => (
+            <a class="tag tag-lg" href={`/blog/tag/${tag.slug}/`}>{tag.tag} <span>{tag.count}</span></a>
+          ))}
+        </p>
+      </div>
+    </section>
+  )}
+</BaseLayout>

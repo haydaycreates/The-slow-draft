@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { site } from '../../../site.config.js';
+import { ICONS, tagCounts, tagSlug } from '../../../lib/format.js';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = tagCounts(posts);
+  return tags.map((entry) => ({
+    params: { tag: entry.slug },
+    props: {
+      tag: entry.tag,
+      posts: posts
+        .filter((post) => (post.data.tags || []).includes(entry.tag))
+        .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const allTags = tagCounts(allPosts).slice(0, 12);
+---
+
+<BaseLayout
+  title={`Posts tagged ${tag}`}
+  description={`Every essay on ${site.title} tagged “${tag}”.`}
+  active="/blog/"
+>
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Blog</p>
+      <h1>#{tag}</h1>
+      <p class="page-sub">
+        {posts.length} {posts.length === 1 ? 'post' : 'posts'} tagged “{tag}”.
+        Browse by <a href="/rss.xml">RSS</a> or subscribe below.
+      </p>
+      <form class="searchbar" action="/blog/" method="get" role="search" data-search-form>
+        <input type="search" name="q" placeholder="Search posts…" aria-label="Search posts" data-search-input>
+        <input type="hidden" name="tag" value={tag}>
+        <button class="btn btn-ghost btn-sm" type="submit">Search</button>
+      </form>
+      <div class="tag-cloud tag-cloud-sm">
+        {allTags.map((entry) => (
+          <a class={`tag${entry.tag === tag ? ' is-on' : ''}`} href={`/blog/tag/${entry.slug}/`}>
+            {entry.tag} <span>{entry.count}</span>
+          </a>
+        ))}
+      </div>
+      <a class="more" href="/blog/">Clear filters <Fragment set:html={ICONS.arrow} /></a>
+    </div>
+  </section>
+
+  <section class="section section-tight">
+    <div class="wrap">
+      <div class="grid grid-3" data-post-grid>
+        {posts.map((post) => <PostCard post={post} />)}
+      </div>
+
+      <div class="empty" data-empty-state hidden>
+        <h3>Nothing here yet</h3>
+        <p>No post matches that search.</p>
+        <a class="btn btn-ghost" href={`/blog/tag/${tag.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/`}>Show all in this topic</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
