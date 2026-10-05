@@ -33,6 +33,19 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
 
+# The private writing desk at /write/ stays out of search results too. Both the
+# bare path and anything under it, so the header applies whichever way the host
+# resolves the directory index.
+[[headers]]
+  for = "/write"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/write/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 # Fonts never change — let the CDN keep them forever.
 [[headers]]
   for = "/fonts/*"
