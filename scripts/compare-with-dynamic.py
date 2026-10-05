@@ -9,7 +9,7 @@ class names that drive the design, and the counts of repeated elements.
 import re, sys, urllib.request, pathlib, collections
 
 DYNAMIC = "http://localhost:3010"
-STATIC = pathlib.Path("/home/user/astro-blog/dist")
+STATIC = pathlib.Path(__file__).resolve().parent.parent / "dist"
 
 PAGES = [
     ("/",              "index.html"),

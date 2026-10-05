@@ -1,0 +1,33 @@
+# Build and verify — runs on every push and pull request.
+#
+# The same three checks Netlify runs on deploy, executed first on GitHub so a
+# broken post fails here instead of on the live site:
+#
+#   1. check:cms    — does public/admin/config.yml still match the content model?
+#   2. build        — does Astro accept every markdown file?
+#   3. check:links  — does every local link, font path and asset in the output resolve?
+
+name: Build and verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify CMS config, build, audit links
+        run: npm run verify

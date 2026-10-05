@@ -107,6 +107,13 @@ export default defineConfig({
      Edit site.url in src/site.config.js, or set SITE_URL when building. */
   site: SITE_URL,
 
+  server: ({ command }) => ({
+    /* `astro preview` is often viewed through a proxy or tunnel whose
+       hostname Vite's host check rejects. Preview only, accept any host —
+       `astro dev` on localhost stays strict. */
+    ...(command === 'preview' ? { allowedHosts: true } : {}),
+  }),
+
   /* Netlify and Cloudflare Pages both default to publishing `dist/`. */
   outDir: './dist',
 

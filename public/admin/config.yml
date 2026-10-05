@@ -1,26 +1,4 @@
 # =============================================================================
-# READY-MADE VARIANT — for when the project sits inside a folder in the repo
-#
-# This is public/admin/config.yml with one change: the five file paths are
-# prefixed with astro-blog/, because the CMS writes paths relative to the
-# REPOSITORY ROOT, and your repository looks like:
-#
-#     The-slow-draft/            ← repository root
-#     └── astro-blog/            ← the project (Netlify "Base directory")
-#         └── src/content/blog/  ← where posts actually live
-#
-# HOW TO USE
-#   1. On GitHub, open  astro-blog/public/admin/config.yml
-#   2. Press the pencil (Edit this file)
-#   3. Select everything (Ctrl+A / Cmd+A) and paste this whole file over it
-#   4. Commit changes
-#
-# If you ever move the project to the top of the repository instead, go back to
-# the original public/admin/config.yml in the project (the paths there have no
-# astro-blog/ prefix).
-# =============================================================================
-
-# =============================================================================
 # Decap CMS — the writing desk at /admin/
 #
 # Everything the editor shows is defined here. Each collection points at the
@@ -50,8 +28,8 @@ local_backend: true
 # you want a review step, or a deploy preview to check before it goes live.
 publish_mode: simple
 
-site_url: https://the-slow-draft.example
-display_url: https://the-slow-draft.example
+site_url: https://theslowdraft.netlify.app
+display_url: https://theslowdraft.netlify.app
 logo_url: /favicon.svg
 
 # -----------------------------------------------------------------------------
@@ -60,7 +38,7 @@ logo_url: /favicon.svg
 # Uploads land in the repo at public/uploads/ and are served from /uploads/…
 # (Astro copies public/ into the built site unchanged.) Drop any image into a
 # post and it is committed alongside it, so the whole post is one atomic change.
-media_folder: astro-blog/public/uploads
+media_folder: public/uploads
 public_folder: /uploads
 media_library:
   name: default
@@ -77,7 +55,7 @@ collections:
     description: >-
       One markdown file per post. The filename becomes the URL, so
       "my new post" is published at /blog/my-new-post/.
-    folder: astro-blog/src/content/blog
+    folder: src/content/blog
     create: true
     delete: true
     extension: md
@@ -158,7 +136,7 @@ collections:
     label: Resources
     label_singular: Resource
     description: Links you recommend, grouped by category on the Resources page.
-    folder: astro-blog/src/content/resources
+    folder: src/content/resources
     create: true
     delete: true
     extension: md
@@ -198,14 +176,14 @@ collections:
     files:
       - name: about
         label: About page
-        file: astro-blog/src/content/pages/about.md
+        file: src/content/pages/about.md
         fields:
           - { name: eyebrow, label: Small label above the heading, widget: string, required: false }
           - { name: heading, label: Heading, widget: string }
           - { name: body, label: Body, widget: markdown }
       - name: resources
         label: Resources page intro
-        file: astro-blog/src/content/pages/resources.md
+        file: src/content/pages/resources.md
         fields:
           - { name: eyebrow, label: Small label above the heading, widget: string, required: false }
           - { name: heading, label: Heading, widget: string }
