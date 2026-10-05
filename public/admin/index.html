@@ -8,22 +8,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!--
-      Decap CMS (the browser dashboard that commits markdown to git) plus the
-      Netlify Identity widget it uses to sign you in with git-gateway.
+      Decap CMS and the Netlify Identity widget are served from this site's
+      public/admin/vendor/ directory. Pinned versions: Decap CMS 3.16.3 and
+      Netlify Identity Widget 2.0.3. Decap is code-split, so keep every
+      *.decap-cms.js chunk beside decap-cms.js when updating the bundle. The
+      vendor directory also includes both WebP .wasm codecs and license notices.
 
-      Both scripts are now vendored locally in public/admin/vendor/ to avoid
-      CDN dependencies. This ensures the editor loads in offline environments,
-      sandboxed preview panes, and situations where unpkg or identity.netlify.com
-      are blocked.
-
-      To update the vendored scripts in the future, download new versions via:
-
-        curl -L -o public/admin/vendor/decap-cms.js \
-          https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js
-        curl -L -o public/admin/vendor/netlify-identity-widget.js \
-          https://identity.netlify.com/v1/netlify-identity-widget.js
-
-      …then commit the new versions to the repository.
+      To update, replace the complete set of Decap dist assets in
+      public/admin/vendor/ and update this version note.
     -->
     <script src="/admin/vendor/netlify-identity-widget.js"></script>
     <script>
@@ -42,8 +34,8 @@
     <script src="/admin/vendor/decap-cms.js"></script>
 
     <style>
-      /* Shown only if the CMS script cannot load (offline, blocked CDN, or a
-         sandboxed preview pane). The editor itself is styled by Decap. */
+      /* Shown only if the self-hosted CMS assets fail or the app never mounts.
+         The editor itself is styled by Decap. */
       body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
       .boot {
         max-width: 34rem; margin: 12vh auto; padding: 0 1.5rem; color: #2a241e;
@@ -72,15 +64,18 @@
     <div class="boot" id="boot-failed" hidden>
       <h1>The editor could not load</h1>
       <p>
-        The editor did not load after 6 seconds. This might indicate a problem
-        with the vendored scripts or the Netlify Identity service.
+        The dashboard scripts are self-hosted from <code>/admin/vendor/</code>.
+        If you still see an older message about unpkg, this deployment is serving
+        an older admin page — redeploy the latest commit and hard-refresh this tab.
       </p>
       <p>
-        Try refreshing the page. If the problem persists, check that:
+        If the latest page still does not start, check the browser console and
+        Network panel for failed <code>/admin/vendor/</code> requests. The main
+        CMS file and its code-split chunks must all be present in the deployment.
       </p>
       <ul>
-        <li><code>public/admin/vendor/decap-cms.js</code> exists and is valid</li>
-        <li><code>public/admin/vendor/netlify-identity-widget.js</code> exists and is valid</li>
+        <li><code>public/admin/vendor/decap-cms.js</code> and all <code>*.decap-cms.js</code> chunks</li>
+        <li><code>public/admin/vendor/netlify-identity-widget.js</code></li>
         <li>Netlify Identity is enabled on your site</li>
       </ul>
       <p style="color:#8b7f70;font-size:.9rem">
@@ -89,7 +84,7 @@
     </div>
 
     <script>
-      /* If Decap has not booted after a few seconds, show the fallback note. */
+      /* Allow time for the vendored CMS bundle and its chunks to load. */
       setTimeout(() => {
         const note = document.getElementById('boot-note');
         const failed = document.getElementById('boot-failed');
@@ -98,7 +93,7 @@
           if (note) note.hidden = true;
           if (failed) failed.hidden = false;
         }
-      }, 6000);
+      }, 12000);
     </script>
   </body>
 </html>

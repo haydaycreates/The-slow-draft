@@ -18,6 +18,7 @@ npm install
 npm run dev        # http://localhost:4321 — writing with live reload
 npm run build      # → ./dist   (16 pages, ~1s)
 npm run preview    # serve ./dist locally to check the real output
+npm run verify     # CMS config + local admin bundle + build + link audit
 
 npm run check:cms  # CMS config still matches the content schema?
 npm run test:cms   # prove anything the dashboard writes builds and publishes
@@ -32,7 +33,9 @@ Requires **Node 22.12+** (Astro 7's minimum).
 There is a dashboard at **/admin/** — Decap CMS. Sign in, write, press Publish,
 and it commits markdown to this git repo; the host rebuilds and the post is live.
 No code editor, no local setup. It is a static admin page, so there is no server
-or database to run.
+or database to run. Decap CMS and the Netlify Identity widget (including Decap's
+code-split chunks) are vendored under `public/admin/vendor/`, so loading the
+editor does not depend on unpkg.
 
 ### One-time setup (Netlify)
 
@@ -161,8 +164,9 @@ The-slow-draft/
 ├── netlify.toml              build settings + admin noindex header
 ├── public/
 │   ├── admin/
-│   │   ├── index.html        the dashboard (Decap CMS + Netlify Identity)
-│   │   └── config.yml        collections, fields, media folder, backend
+│   │   ├── index.html        dashboard shell and local script references
+│   │   ├── config.yml        collections, fields, media folder, backend
+│   │   └── vendor/           self-hosted Decap bundle, chunks and Identity widget
 │   ├── uploads/              images uploaded from the dashboard
 │   ├── fonts/                10 self-hosted woff2 files (Lora, Merriweather,
 │   │                         Playfair Display, Inter, Poppins, JetBrains Mono)
@@ -173,6 +177,7 @@ The-slow-draft/
 ├── scripts/
 │   ├── migrate-from-db.mjs        the migration that produced src/content/*
 │   ├── validate-cms-config.mjs    CMS fields vs the Astro content schema
+│   ├── check-admin-assets.mjs     built Decap bundle and split chunks
 │   ├── test-cms-roundtrip.mjs     write posts as Decap does, build, verify
 │   └── compare-with-dynamic.py    page-by-page fidelity check (see below)
 └── src/

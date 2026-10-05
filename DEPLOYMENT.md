@@ -60,7 +60,7 @@ folder (the root of this repository, where `package.json` lives).
 
 ```bash
 npm install
-npm run verify        # checks the CMS config, builds, audits every link
+npm run verify        # checks the CMS config and admin bundle, builds, audits every link
 ```
 
 You should see:
@@ -68,6 +68,10 @@ You should see:
 ```
   The CMS config and the Astro content model agree.
   … 16 page(s) built …
+  Decap CMS 3.16.3 and Netlify Identity are self-hosted in the build.
+  All 94 code-split CMS chunks are present and referenced.
+  All WebP codecs and vendor license notices are included.
+  No remote script is used to bootstrap /admin/.
   Every local link, font path and asset resolves. Safe to deploy.
 ```
 
@@ -422,6 +426,22 @@ Your post starts here.
 **Editing something already published:** open it in `/admin/`, change it, press
 Save. Because every change is a git commit, you can always see what changed and
 undo it — **GitHub → Commits** gives you the full history of your writing.
+
+### If `/admin/` says the editor could not load
+
+The CMS entry bundle, Netlify Identity widget and Decap's code-split chunks are
+served from `public/admin/vendor/`; the dashboard no longer loads its scripts
+from unpkg. If you still see the old message about unpkg after a deploy:
+
+1. Confirm the host deployed the latest commit from the branch it watches.
+2. Open `https://your-site/admin/` directly in a tab and hard-refresh it.
+3. In the browser Network panel, check that `/admin/vendor/decap-cms.js`,
+   `/admin/vendor/netlify-identity-widget.js`, and the requested
+   `*.decap-cms.js` chunks return successfully.
+
+The deploy check `npm run verify` validates those local assets so a missing
+chunk should be caught before publishing. Your writing remains in
+`src/content/blog/` in git even if the dashboard cannot open.
 
 ---
 
