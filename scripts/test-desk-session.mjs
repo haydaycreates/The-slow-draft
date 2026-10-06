@@ -36,7 +36,7 @@ if (!fs.existsSync(pagePath)) {
 const PAGE_HTML = fs.readFileSync(pagePath, 'utf8');
 const CONFIG = {
   owner: 'haydaycreates',
-  repo: 'The-slow-draft',
+  repo: 'haydaycreates.github.io',
   branch: 'main',
   postsDir: 'src/content/blog',
   mediaDir: 'public/uploads',

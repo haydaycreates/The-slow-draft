@@ -63,7 +63,7 @@ export const site = {
    * change nothing.
    * Set it to '' to hide the button entirely.
    */
-  adminLink: '/write/',
+  writeLink: '/write/',
 
   /**
    * Where the writing desk reads and commits your posts.
@@ -77,25 +77,15 @@ export const site = {
    */
   writeDesk: {
     owner: 'haydaycreates',
-    repo: 'The-slow-draft',
+    repo: 'haydaycreates.github.io',
     branch: 'main',
     postsDir: 'src/content/blog',
     mediaDir: 'public/uploads',
   },
 
-  /**
-   * Load the Netlify Identity widget on every page. Needed only when you send
-   * invitation emails: the invite link lands on the home page with a token in
-   * the URL fragment, and this widget is what turns that into a login.
-   *
-   * Leave false if you sign in to /admin/ directly (the admin page loads the
-   * widget itself) — or set true if you want invitations to work end to end.
-   */
-  identityWidget: false,
-
   /* Absolute URL used in RSS, the sitemap and canonical tags.
      SITE_URL=https://yourdomain.com npm run build overrides this. */
-  url: "https://theslowdraft.netlify.app",
+  url: "https://haydaycreates.github.io",
 };
 
 export default site;

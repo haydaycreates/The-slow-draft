@@ -10,7 +10,7 @@
  * one fine-grained permission — Contents: Read and write — and support files up
  * to 100 MB, so cover images upload through the same door as the post itself.
  *
- * Your host (Netlify, Cloudflare Pages, GitHub Pages) notices the new commit on
+ * Your host (GitHub Pages, Cloudflare Pages, Netlify) notices the new commit on
  * main and rebuilds; that is the whole publishing pipeline.
  */
 

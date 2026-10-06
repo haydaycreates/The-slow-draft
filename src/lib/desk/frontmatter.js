@@ -1,10 +1,10 @@
 /**
  * Frontmatter: reading and writing the top of a post.
  *
- * The desk has to understand files written two ways — by hand, and by the old
- * Decap dashboard (which serialises with js-yaml, so long values can come out
- * folded over several lines). It writes one canonical shape, which is the shape
- * the rest of src/content/blog/ already uses:
+ * The desk has to understand files written two ways — by hand, and by older
+ * tools that serialised with js-yaml, so long values can come out folded over
+ * several lines. It writes one canonical shape, which is the shape the rest of
+ * src/content/blog/ already uses:
  *
  *   ---
  *   title: "My new post"

@@ -2,8 +2,12 @@
 
 A personal blog with essays, an about page, recommended resources and an RSS feed.
 Built with **Astro 7** as a fully static site: `npm run build` writes plain HTML,
-CSS and fonts — no server, no database, no runtime dependencies. Drop the output
-on Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3 or any web host.
+CSS and fonts — no server, no database, no runtime dependencies.
+
+The site lives on **GitHub Pages** at **https://haydaycreates.github.io/**: every
+merge to `main` is built and published by GitHub Actions, free and unlimited.
+(Netlify is the retired former host; Cloudflare Pages is the documented future
+move — see [DEPLOYMENT.md](DEPLOYMENT.md).)
 
 The design is the same warm-paper look as before: the same stylesheet, the same
 self-hosted typefaces, the same layout, verified page by page against the
@@ -18,7 +22,7 @@ npm install
 npm run dev        # http://localhost:4321 — writing with live reload
 npm run build      # → ./dist   (17 pages, ~1s)
 npm run preview    # serve ./dist locally to check the real output
-npm run verify     # CMS config + admin bundle + writing desk + build + link audit
+npm run verify     # build + writing desk (two suites) + link audit
 
 npm run check:desk     # the desk's markdown, frontmatter and built page
 npm run check:desk:ui  # a whole writing session, driven in a real DOM
@@ -37,8 +41,8 @@ commits the markdown file straight to this repository; your host sees the commit
 rebuilds, and the post is live about a minute later.
 
 There is **no server, no database and no CMS behind it** — the page is 30 KB of
-bundled JavaScript that talks only to `api.github.com`, so it works on Netlify,
-Cloudflare Pages, GitHub Pages or anywhere else without configuration.
+bundled JavaScript that talks only to `api.github.com`, so it works on GitHub
+Pages, Cloudflare Pages, Netlify or anywhere else without configuration.
 
 ### Why nobody else can write
 
@@ -49,10 +53,12 @@ Cloudflare Pages, GitHub Pages or anywhere else without configuration.
   a cookie or a server.
 - Writing is authorised by GitHub, not by the page: the token only works for
   whoever owns it, and you can revoke it in one click.
-- `/write/` is marked `noindex`, disallowed in `robots.txt`, sent with an
-  `X-Robots-Tag: noindex` header on Netlify, and left out of the sitemap.
+- `/write/` is marked `noindex` in its own HTML, disallowed in `robots.txt`, and
+  left out of the sitemap. (On hosts that support response headers it also gets
+  an `X-Robots-Tag: noindex` header; GitHub Pages does not, and does not need
+  to — the first two travel with the files.)
 
-Set `adminLink: ''` in `src/site.config.js` if you would rather the header had no
+Set `writeLink: ''` in `src/site.config.js` if you would rather the header had no
 "Write" button at all — the page still works at its address.
 
 ### One-time setup: a GitHub token (two minutes)
@@ -66,7 +72,8 @@ Set `adminLink: ''` in `src/site.config.js` if you would rather the header had n
    Choose **Keep on this device** for your own phone, **This session only**
    anywhere shared.
 
-If the repository is forked or renamed, update `writeDesk` in
+The desk currently points at `haydaycreates/haydaycreates.github.io`. If the
+repository is ever forked or renamed again, update `writeDesk` in
 `src/site.config.js` — owner, repo, branch, posts folder and media folder all
 live there.
 
@@ -97,29 +104,13 @@ npm run test:desk       # the above, plus a real `astro build` of a desk-written
 `check:desk` and `check:desk:ui` both run inside `npm run verify`, so CI fails if
 the editor ever stops writing files the site can build.
 
-### The old dashboard at /admin/ (optional, unused)
+A minute or two after you press **Publish**, the commit reaches `main`, GitHub
+Actions rebuilds the site, and the post appears on the home page, the blog
+index, the tag page, the RSS feed and the sitemap.
 
-`public/admin/` still holds the Decap CMS bundle from the earlier setup. It needs
-Netlify **Identity** *and* **Git Gateway** switched on, plus an invitation email,
-and it adds ~6.6 MB to every deploy. Nothing links to it any more. To use it
-locally without any account:
-
-```bash
-npm run dev            # terminal 1 — the site on :4321
-npx decap-server       # terminal 2 — the CMS backend on :8081
-```
-
-Then open **http://localhost:4321/admin/** and press *Login* — no password; Decap
-writes straight to your working copy. To retire it completely, delete
-`public/admin/`, `scripts/check-admin-assets.mjs`, `scripts/validate-cms-config.mjs`,
-`scripts/test-cms-roundtrip.mjs` and the `check:cms` / `check:admin` / `test:cms`
-lines from `package.json`, and drop the `/admin/*` block from `netlify.toml`.
-
-Roughly a minute after you press Publish, the commit triggers a rebuild and the
-post appears on the home page, the blog index, the tag page, the RSS feed and the
-sitemap. Set `identityWidget: true` in `src/site.config.js` if you want
-invitation emails to work when they land on the home page rather than `/admin/`
-(the setting is explained in that file).
+(The old Decap dashboard at `/admin/` has been removed from the repository —
+`/write/` replaced it, and it added ~6.6 MB to every deploy while needing
+Netlify Identity and Git Gateway to work.)
 
 ### What the desk writes
 
@@ -138,12 +129,6 @@ site — flip the switch to *Published* when it is ready.
 The desk writes the same frontmatter shape as the rest of the folder
 (`title: "…"`, `date: "YYYY-MM-DD"`, `tags: ["a", "b"]`) and it *reads* anything
 the old dashboard left behind, including js-yaml's folded multi-line values.
-
-If you keep `/admin/` as well, `npm run check:cms` still checks its collections
-against the Astro schema and `npm run test:cms` still builds posts the way Decap
-writes them. On a host other than Netlify, Decap's `git-gateway` backend needs
-replacing with the GitHub backend — the desk needs no such change, because it
-never used a gateway at all.
 
 ---
 
@@ -201,15 +186,11 @@ size) lives in `src/site.config.js` under `typography`.
 ## What lives where
 
 ```
-The-slow-draft/
+haydaycreates.github.io/
 ├── astro.config.mjs          build settings (site URL, outDir, markdown engine)
 ├── package.json              three dependencies: astro, its markdown engine, jsdom (tests)
-├── netlify.toml              build settings + noindex headers for /write/ and /admin/
+├── netlify.toml              legacy Netlify settings — delete once Netlify is retired
 ├── public/
-│   ├── admin/                the old Decap dashboard — optional, nothing links to it
-│   │   ├── index.html        dashboard shell and local script references
-│   │   ├── config.yml        collections, fields, media folder, backend
-│   │   └── vendor/           self-hosted Decap bundle, chunks and Identity widget
 │   ├── uploads/              images uploaded from the writing desk
 │   ├── fonts/                10 self-hosted woff2 files (Lora, Merriweather,
 │   │                         Playfair Display, Inter, Poppins, JetBrains Mono)
@@ -221,9 +202,7 @@ The-slow-draft/
 │   ├── migrate-from-db.mjs        the migration that produced src/content/*
 │   ├── test-write-desk.mjs        the desk's markdown, frontmatter and built page
 │   ├── test-desk-session.mjs      a full writing session driven through a real DOM
-│   ├── validate-cms-config.mjs    CMS fields vs the Astro content schema
-│   ├── check-admin-assets.mjs     built Decap bundle and split chunks
-│   ├── test-cms-roundtrip.mjs     write posts as Decap does, build, verify
+│   ├── check-links.mjs            every local link, font path and asset in the build
 │   └── compare-with-dynamic.py    page-by-page fidelity check (see below)
 └── src/
     ├── content.config.ts     the content model — blog, resources, pages
@@ -327,31 +306,36 @@ PASS  /blog/the-pen-menu-and-how-to-use-it   text ✓  classes ✓
 
 ## Deploying
 
-The full walkthrough — GitHub, host setup, the writing desk, and a verification
-checklist — is in **[DEPLOYMENT.md](DEPLOYMENT.md)**. The short version:
+The site deploys itself: every merge to `main` runs
+`.github/workflows/deploy-github-pages.yml`, which builds, verifies and
+publishes to **GitHub Pages**. The one-time setup (three settings in the
+repository's Settings pages), retiring the old Netlify host, and the optional
+future move to Cloudflare Pages are walked through in
+**[DEPLOYMENT.md](DEPLOYMENT.md)**. The short version:
 
-1. `npm run verify`, then push the repo to GitHub.
-2. Point Netlify or Cloudflare Pages at it: build command `npm run build`,
-   publish directory `dist`, and `NODE_VERSION=22.12.0`.
-3. Set `SITE_URL` to your domain in the host's environment variables.
-4. Make a fine-grained GitHub token with **Contents: Read and write** on this
+1. Rename the repository to `haydaycreates.github.io` (**Settings → General**).
+2. **Settings → Pages → Source:** *GitHub Actions*.
+3. **Settings → Secrets and variables → Actions:** variable `DEPLOY_TO_PAGES` = `true`.
+4. Merge to `main` — the site is live at https://haydaycreates.github.io/ about
+   a minute later, and every future merge updates it, free and unlimited.
+5. Make a fine-grained GitHub token with **Contents: Read and write** on this
    repository, paste it into `/write/`, and start writing. No host settings, no
    Identity, no OAuth worker — the desk is the same on every host.
 
-Manual deploys work too:
+Any other host works too — build once and hand over the folder:
 
 ```bash
 SITE_URL=https://yourdomain.com npm run build   # → dist/, plain static files
 ```
 
+- **Cloudflare Pages** — connect the repo: build `npm run build`, output `dist`,
+  environment variable `NODE_VERSION=22.12.0` (DEPLOYMENT.md has the steps)
 - **Vercel** — framework preset Astro, output directory `dist`
-- **GitHub Pages** — publish the contents of `dist/` (set `base` in
-  `astro.config.mjs` if the site lives at a subpath)
-- **Any host** — copy the folder with `rsync`/`scp`; nothing needs to run
+- **Any host** — copy `dist/` with `rsync`/`scp`; nothing needs to run
 
-Every push to `main` runs the workflow in `.github/workflows/build-and-verify.yml`,
-which builds the site, exercises the writing desk in a DOM, and fails the run if a
-post's frontmatter is wrong, the editor stops working, or a link is broken.
+Every push and pull request also runs `.github/workflows/build-and-verify.yml`,
+which builds the site, exercises the writing desk in a DOM, and fails the run if
+a post's frontmatter is wrong, the editor stops working, or a link is broken.
 
 ---
 

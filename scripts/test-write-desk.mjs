@@ -143,7 +143,7 @@ console.log('  Frontmatter — the shapes the old dashboard could leave behind')
 console.log('  --------------------------------------------------------------');
 
 {
-  /* Decap serialised with js-yaml, which folds long values over several lines. */
+  /* The old dashboard serialised with js-yaml, which folds long values over several lines. */
   const folded = yaml.dump({
     title: 'A post with a very long summary',
     date: new Date(Date.UTC(2026, 9, 5)),
